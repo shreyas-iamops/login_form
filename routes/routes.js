@@ -1,3 +1,5 @@
+const { auth } = require("../middleware/auth");
+
 const {
   employeeRegistration,
   getAllEmployee,
@@ -7,7 +9,7 @@ const {
     // managerRegistration,
     // getAllManager,
     // managerLogin,
-    index,
+    index,      
     // login,
     loginPage,
     adminLoginPage,
@@ -26,7 +28,7 @@ const {
   appRouter.post("/login", login);
 
   //employee Registration route
-  appRouter.get("/getAllEmployee", getAllEmployee);
+  appRouter.get("/getAllEmployee",auth, getAllEmployee);
   appRouter.post("/employeeRegistration", employeeRegistration);
   
   

@@ -28,7 +28,7 @@ const {
   appRouter.post("/login", login);
 
   //employee Registration route
-  appRouter.get("/getAllEmployee",auth, getAllEmployee);
+  appRouter.get("/getAllEmployee", getAllEmployee);
   appRouter.post("/employeeRegistration", employeeRegistration);
   
   

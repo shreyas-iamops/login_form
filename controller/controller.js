@@ -33,9 +33,17 @@ const employeeRegistration = async (req, res) => {
     const employeeExist = await employeeModel.findOne({ email: payload.email });
     console.log(employeeExist, "*****************************");
     if (!employeeExist) {
+      
       const savedUser = await new employeeModel(payload).save();
+      const generatetoken = jwt.sign(savedUser.id,process.env.SECRET_KEY)
+      console.log(generatetoken)
+      const update = await employeeModel.findByIdAndUpdate(savedUser.id, {
+        token: generatetoken,
+         new: true 
+      });
+      console.log(update);
       console.log(savedUser, "Employee Register successfully");
-      res.status(200).json(savedUser);
+      res.status(200).json(update);
 
       // document. location. reload()
       return;
@@ -201,24 +209,7 @@ const login = async (req, res) => {
       res.status(404).json({ message: "User does not exist" });
       return;
     } else {
-      // if(user.dept === "admin"){
-      //   // console.log("compare and check password and do the following task")
-      //   if(user.password !== payload.password){
-      //     console.log("password is incorrect")
-      //     res.status(200).json({message:"Incorrect password"})
-      //     return
-      //   }
-      //   const renderPanel = await employeeModel.find({});
-      //   console.log(renderPanel)
-      //   res
-
-      //     // .status(200)
-      //     // .setHeader("x-auth-token", token)
-      //     .render("index", {records: renderPanel,hello: "hello" });
-      //   // res.render('index')
-      //   // res.status(200).json({message:"Admin panel rendered successfully"})
-      //   console.log("render admin panel")
-      // }
+      
       if (user.designation === "manager") {
         console.log("compare and check password and do the following task");
         console.log(user.password, payload.password);
@@ -230,13 +221,13 @@ const login = async (req, res) => {
 
         const managerTeam = await employeeModel.find({ dept: user.dept });
         console.log(managerTeam);
-        res
+        res.json({email:user.email,id:user.id,token:user.token})
 
           //     // .status(200)
-          .setHeader("x-auth-token", token)
-          .render("loginManager", { records: managerTeam, hello: "hello" });
+          // .setHeader("x-auth-token", token)
+          // .render("loginManager", { records: managerTeam, hello: "hello" });
         // res.status(200).json({managerTeam,message:"Render data of user under the manager"})
-        console.log("render admin panel of manager");
+        // console.log("render admin panel of manager");
       } else {
         // console.log("search employee form the employee model and get their respective data")
         // console.log("this is the data of interns")
@@ -249,7 +240,7 @@ const login = async (req, res) => {
         const profile = await employeeModel.find({ email: payload.email });
 
         // res.status(200).json(user)
-        res;
+        res.json({email:user.email,id:user.id,token:user.token});
 
         //     // .status(200)
         //     // .setHeader("x-auth-token", token)

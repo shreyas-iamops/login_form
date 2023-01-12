@@ -17,24 +17,20 @@ let employeeSchema = new Schema(
     password: {
       type: String,
     },
-    age: {
+
+    phoneNo: {
       type: Number,
-    },
-    education: {
-      type: String,
-    },
-    // personal_email: {
-    //   type: String,
-    // },
-    contactNo: {
-      type: Number,
-    },
-    dept: {
-      type: String,
     },
     designation: {
       type: String,
     },
+    department: {
+      type: String,
+    },
+    token: {
+      type: String,
+    },
+   
   },
   {
     timestamps: {

@@ -1,6 +1,7 @@
 const { auth } = require("../middleware/auth");
 
 const {
+  page,
   employeeRegistration,
   getAllEmployee,
   singleEmployee,
@@ -27,6 +28,7 @@ const {
   const appRouter = require("express").Router();
 
   appRouter.post("/login", login);
+  appRouter.get("/ok", page);
 
   //employee Registration route
   appRouter.get("/getAllEmployee", getAllEmployee);

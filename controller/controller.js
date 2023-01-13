@@ -22,6 +22,14 @@ const employeeModel = require("../model/employeeSchema");
 
 //##############  EMPLOYEE  ###################
 
+const page = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Welcome to IAMOPS" });
+  } catch (error) {
+    res.status(200).json({ message: "Something went wrong" });
+  }
+};
+
 //joi validation for employee registration
 const SchemaEmployee = Joi.object().keys({
   firstName: Joi.string().min(3).required(),
@@ -40,11 +48,9 @@ const employeeRegistration = async (req, res) => {
   try {
     const payload = req.body;
     if (SchemaEmployee.validate(payload).error) {
-      res
-        .status(422)
-        .json({
-          message: "Employee not added.Please check all field are correct",
-        });
+      res.status(422).json({
+        message: "Employee not added.Please check all field are correct",
+      });
       return;
     }
     // if (!payload) {
@@ -106,19 +112,21 @@ const getAllEmployee = async (req, res) => {
 //get single employee
 const singleEmployee = async (req, res) => {
   try {
-    console.log("In get single user")
+    console.log("In get single user");
     payload = req.params.id;
-    console.log(payload)
-    if(payload === undefined || !payload ){
-      console.log("no id present in params")
-      return
+    console.log(payload);
+    if (payload === undefined || !payload) {
+      console.log("no id present in params");
+      return;
     }
-    const user = await employeeModel.findById({_id:payload});
+    const user = await employeeModel.findById({ _id: payload });
     console.log(user);
-    res.status(200).json(user)
+    res.status(200).json(user);
   } catch (error) {
-    res.status(400).json({message:"something went wrong while getting the single user"})
-    console.log("something went wrong while getting the single user")
+    res
+      .status(400)
+      .json({ message: "something went wrong while getting the single user" });
+    console.log("something went wrong while getting the single user");
   }
 };
 
@@ -475,6 +483,7 @@ const userProfilePage = async (req, res) => {
 };
 
 module.exports = {
+  page,
   employeeRegistration,
   login,
   getAllEmployee,

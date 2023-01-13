@@ -3,6 +3,7 @@ const { auth } = require("../middleware/auth");
 const {
   employeeRegistration,
   getAllEmployee,
+  singleEmployee,
   adminRegistration,
     getAllAdmin,
     adminLogin,
@@ -29,6 +30,7 @@ const {
 
   //employee Registration route
   appRouter.get("/getAllEmployee", getAllEmployee);
+  appRouter.get("/singleEmployee/:id", singleEmployee);
   appRouter.post("/employeeRegistration", employeeRegistration);
   
   

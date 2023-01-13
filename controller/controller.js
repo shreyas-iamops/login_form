@@ -22,29 +22,63 @@ const employeeModel = require("../model/employeeSchema");
 
 //##############  EMPLOYEE  ###################
 
+//joi validation for employee registration
+const SchemaEmployee = Joi.object().keys({
+  firstName: Joi.string().min(3).required(),
+  lastName: Joi.string().min(3).required(),
+
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+  phoneNo: Joi.number().min(10).required(),
+  designation: Joi.string().min(3).required(),
+  department: Joi.string().min(3).required(),
+  token: Joi.string().optional(),
+});
+
 //employee registration
 const employeeRegistration = async (req, res) => {
   try {
     const payload = req.body;
-    if (!payload) {
-      res.status(404).json({ message: "Please enter all fields" });
+    if (SchemaEmployee.validate(payload).error) {
+      res
+        .status(422)
+        .json({
+          message: "Employee not added.Please check all field are correct",
+        });
+      return;
     }
-    // console.log(payload,"#######################################################")
-    const employeeExist = await employeeModel.findOne({ email: payload.email });
+    // if (!payload) {
+    //   res.status(404).json({ message: "Please enter all fields" });
+    // }
+    const payLoadValue = Schema.validate(payload).value;
+    const employeeExist = await employeeModel.findOne({
+      email: payLoadValue.email,
+    });
     console.log(employeeExist, "*****************************");
     if (!employeeExist) {
-      
-      const savedUser = await new employeeModel(payload).save();
-      const generatetoken = jwt.sign(savedUser.id,process.env.SECRET_KEY)
-      console.log(generatetoken)
+      const passwordToken = jwt.sign(
+        payLoadValue.password,
+        process.env.SECRET_KEY
+      );
+      const savedUser = await new employeeModel(payLoadValue).save();
+      const generatetoken = jwt.sign(savedUser.id, process.env.SECRET_KEY);
+      console.log(generatetoken);
       const update = await employeeModel.findByIdAndUpdate(savedUser.id, {
         token: generatetoken,
-         new: true 
+        password: passwordToken,
+        new: true,
       });
       console.log(update);
       console.log(savedUser, "Employee Register successfully");
-      res.status(200).json(update);
-
+      res.status(200).json({
+        firstName: update.firstName,
+        lastName: update.lastName,
+        email: update.email,
+        designation: update.designation,
+        department: update.department,
+        token: update.token,
+      });
+      // res.json({email:user.email,id:user.id,token:user.token})
       // document. location. reload()
       return;
     }
@@ -66,6 +100,25 @@ const getAllEmployee = async (req, res) => {
     res.status(400).json({
       message: "Something went wrong while fetching list of all admin",
     });
+  }
+};
+
+//get single employee
+const singleEmployee = async (req, res) => {
+  try {
+    console.log("In get single user")
+    payload = req.params.id;
+    console.log(payload)
+    if(payload === undefined || !payload ){
+      console.log("no id present in params")
+      return
+    }
+    const user = await employeeModel.findById({_id:payload});
+    console.log(user);
+    res.status(200).json(user)
+  } catch (error) {
+    res.status(400).json({message:"something went wrong while getting the single user"})
+    console.log("something went wrong while getting the single user")
   }
 };
 
@@ -140,8 +193,6 @@ const getAllAdmin = async (req, res) => {
   }
 };
 
-
-
 //admin login
 const adminLogin = async (req, res) => {
   console.log("In adminLogin");
@@ -183,12 +234,9 @@ const adminLogin = async (req, res) => {
     //generation of login token
     token = jwt.sign(payLoadValue, process.env.SECRET_KEY); //generate login token
     console.log(token);
-   
-    res
-    .status(200)
-    .setHeader("x-auth-token", token)
-    .json({ user ,token})
-    
+
+    res.status(200).setHeader("x-auth-token", token).json({ user, token });
+
     console.log("LOGIN TOKEN GENERATED SUCCESSFULLY");
   } catch (error) {
     res.status(400).json("something went wrong while login");
@@ -209,108 +257,47 @@ const login = async (req, res) => {
       res.status(404).json({ message: "User does not exist" });
       return;
     } else {
-      
-      if (user.designation === "manager") {
-        console.log("compare and check password and do the following task");
-        console.log(user.password, payload.password);
-        if (user.password !== payload.password) {
-          console.log("password is incorrect");
-          res.status(200).json({ message: "Incorrect password" });
-          return;
-        }
+      const decryptPassword = jwt.verify(user.password, process.env.SECRET_KEY);
+      if (decryptPassword !== payload.password) {
+        console.log("password is incorrect");
+        res.status(200).json({ message: "Incorrect password" });
+        return;
+      }
 
+      if (user.designation === "Manager") {
+        console.log("i am manager");
         const managerTeam = await employeeModel.find({ dept: user.dept });
-        console.log(managerTeam);
-        res.json({email:user.email,id:user.id,token:user.token})
+        // console.log(managerTeam);
+        res
+          .status(200)
+          .json({ id: user.id, email: user.email, token: user.token });
+        // res.status(200).json({firstName:update.firstName, lastName:update.lastName, email:update.email, designation:update.designation, department:update.department, token:update.token});
 
-          //     // .status(200)
-          // .setHeader("x-auth-token", token)
-          // .render("loginManager", { records: managerTeam, hello: "hello" });
+        //     // .status(200)
+        // .setHeader("x-auth-token", token)
+        // .render("loginManager", { records: managerTeam, hello: "hello" });
         // res.status(200).json({managerTeam,message:"Render data of user under the manager"})
         // console.log("render admin panel of manager");
       } else {
         // console.log("search employee form the employee model and get their respective data")
         // console.log("this is the data of interns")
-        console.log("compare and check password and do the following task");
-        if (user.password !== payload.password) {
-          console.log("password is incorrect");
-          res.status(200).json({ message: "Incorrect password" });
-          return;
-        }
+
         const profile = await employeeModel.find({ email: payload.email });
 
         // res.status(200).json(user)
-        res.json({email:user.email,id:user.id,token:user.token});
+        res.json({ email: user.email, id: user.id, token: user.token });
 
         //     // .status(200)
         //     // .setHeader("x-auth-token", token)
         // .render("userProfile", { records: profile, hello: "hello" });
-        console.log(user, "User details rendered");
-        console.log("user logged in successfully");
+        console.log("I am intern or someone else");
+        console.log(user, "User details rendered and logged in successfully");
       }
     }
   } catch (error) {
     res.status(500).json({ message: "something went wrong while user login" });
   }
 };
-
-//###################  MANAGER  ###################
-
-// //manager registration
-// const managerRegistration = async (req, res) => {
-//   try {
-//     const payload = req.body;
-//     // console.log(payload,"#######################################################")
-//     const managerExist = await managerModel.findOne({email:payload.email});
-//     console.log(managerExist,"*****************************")
-//     if (!managerExist) {
-//       const savedUser = await new managerModel(payload).save();
-//       res.status(200).json(savedUser);
-//       return;
-//     }
-//     res.status(400).json({ message: "Manager already exist" });
-//   } catch (error) {
-//     res
-//       .status(400)
-//       .json({ message: "Something went wrong while Manager registration" });
-//   }
-// };
-
-// //get All managers
-// const getAllManager = async (req,res) => {
-//   try {
-//     const data = await managerModel.find({})
-//     console.log(data)
-//     res.status(200).json(data)
-//   } catch (error) {
-//     res.status(400).json({ message: "Something went wrong while fetching list of all admin" });
-//   }
-// }
-
-// //manager login
-// const managerLogin = async (req, res) => {
-//   try {
-//     console.log("#############****************")
-//     const payload = req.body;
-//     // console.log(payload, "$$$$$$$$$$$")
-//     const getManager = await managerModel.findOne({email:payload.email});
-//     console.log(getManager, "******************");
-//     if (getManager.password !== payload.password) {
-//       res.status(400).json({ message: "Manager's Password does not match" });
-//       return;
-//     }
-
-//     const data = await employeeModel.find({dept:getManager.dept})
-//     res.status(200).json(data);
-//   } catch (error) {
-//     res.status(400).json({ message: "Something went wrong while Manager login" });
-//   }
-// };
-
-// const login = async(req,res) => {
-//   res.render('login')
-//   console.log("login page rendered")
-// }
 
 //forgot password
 
@@ -491,6 +478,7 @@ module.exports = {
   employeeRegistration,
   login,
   getAllEmployee,
+  singleEmployee,
   adminRegistration,
   getAllAdmin,
   adminLogin,
@@ -577,8 +565,6 @@ module.exports = {
 //   }
 // };
 
-
-
 // const adminLogin = async (req, res) => {
 //   console.log("In adminLogin");
 //   try {
@@ -636,3 +622,61 @@ module.exports = {
 //     res.status(400).json("something went wrong while login");
 //   }
 // };
+
+//###################  MANAGER  ###################
+
+// //manager registration
+// const managerRegistration = async (req, res) => {
+//   try {
+//     const payload = req.body;
+//     // console.log(payload,"#######################################################")
+//     const managerExist = await managerModel.findOne({email:payload.email});
+//     console.log(managerExist,"*****************************")
+//     if (!managerExist) {
+//       const savedUser = await new managerModel(payload).save();
+//       res.status(200).json(savedUser);
+//       return;
+//     }
+//     res.status(400).json({ message: "Manager already exist" });
+//   } catch (error) {
+//     res
+//       .status(400)
+//       .json({ message: "Something went wrong while Manager registration" });
+//   }
+// };
+
+// //get All managers
+// const getAllManager = async (req,res) => {
+//   try {
+//     const data = await managerModel.find({})
+//     console.log(data)
+//     res.status(200).json(data)
+//   } catch (error) {
+//     res.status(400).json({ message: "Something went wrong while fetching list of all admin" });
+//   }
+// }
+
+// //manager login
+// const managerLogin = async (req, res) => {
+//   try {
+//     console.log("#############****************")
+//     const payload = req.body;
+//     // console.log(payload, "$$$$$$$$$$$")
+//     const getManager = await managerModel.findOne({email:payload.email});
+//     console.log(getManager, "******************");
+//     if (getManager.password !== payload.password) {
+//       res.status(400).json({ message: "Manager's Password does not match" });
+//       return;
+//     }
+
+//     const data = await employeeModel.find({dept:getManager.dept})
+//     res.status(200).json(data);
+//   } catch (error) {
+//     res.status(400).json({ message: "Something went wrong while Manager login" });
+//   }
+// };
+
+// const login = async(req,res) => {
+//   res.render('login')
+//   console.log("login page rendered")
+// }

@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const Joi = require("joi");
 const CryptoJS = require("crypto-js");
+// const jwt = require("jsonwebtoken");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
@@ -62,16 +63,16 @@ const employeeRegistration = async (req, res) => {
     });
     console.log(employeeExist, "*****************************");
     if (!employeeExist) {
-      const passwordToken = jwt.sign(
+      const passwordToken =jwt.sign(
         payLoadValue.password,
         process.env.SECRET_KEY
-      );
+      ).toString();;
       const savedUser = await new employeeModel(payLoadValue).save();
       const generatetoken = jwt.sign(savedUser.id, process.env.SECRET_KEY);
       console.log(generatetoken);
       const update = await employeeModel.findByIdAndUpdate(savedUser.id, {
         token: generatetoken,
-        password: passwordToken,
+        password:passwordToken,
         new: true,
       });
       console.log(update);
@@ -259,16 +260,27 @@ const login = async (req, res) => {
     const payload = req.body;
     const user = await employeeModel.findOne({ email: payload.email });
     console.log(user);
-
+    // console.log(decryptPassword, payload.password,"#####password#######")
+    
     if (!user) {
       console.log("user does not exists");
       res.status(404).json({ message: "User does not exist" });
       return;
     } else {
-      const decryptPassword = jwt.verify(user.password, process.env.SECRET_KEY);
-      if (decryptPassword !== payload.password) {
+      // console.log(user.password,"jai hind")
+   
+      // console.log(decrypt, payload.password, "check password ")
+      // const decryptPassword = jwt.verify(user.password, process.env.AES_KEY);
+      // console.log(decryptPassword,"@#$@$@#$%$#%#$%#@#$@#$@#$@#")
+      const decryptedPassword = jwt.verify(
+        user.password,
+        process.env.SECRET_KEY
+      ).toString();
+      console.log(decryptedPassword, payload.password)
+     
+      if (decryptedPassword !== payload.password) {
         console.log("password is incorrect");
-        res.status(200).json({ message: "Incorrect password" });
+        res.status(400).json({ message: "Incorrect password" });
         return;
       }
 
@@ -315,7 +327,7 @@ const forgotPassword = async (req, res) => {
     const payload = req.body; //takes only email id and search it in the database
     console.log(payload);
     console.log(payload.email, "########");
-    const userData = await adminModel.findOne({ email: payload.email });
+    const userData = await employeeModel.findOne({ email: payload.email });
     console.log(userData.id);
     if (!userData) {
       res.status(404).json({ message: "User not found" });
@@ -323,9 +335,9 @@ const forgotPassword = async (req, res) => {
     }
     const token = jwt.sign(userData.id, process.env.SECRET_KEY); //generate login token
     console.log(token, "##########");
-    const find = await adminModel.findOne({ _id: userData.id });
+    const find = await employeeModel.findOne({ _id: userData.id });
     console.log(find, "%%%%%%%%%%%%%%%%%%%%%");
-    const updatedUser = await adminModel.findByIdAndUpdate(
+    const updatedUser = await employeeModel.findByIdAndUpdate(
       userData.id,
       { $set: { token: token } },
       //  {new:true},
@@ -360,7 +372,7 @@ const forgotPassword = async (req, res) => {
             payload.email +
             "," +
             "\n" +
-            'Please, <a href="http://localhost:5000/resetPassword?token=' +
+            'Please, <a href="http://localhost:3001/forgotpassword?token=' +
             token +
             '">Click here</a> and reset your password</p>',
         };
@@ -391,13 +403,16 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
+    console.log("In password reset api")
     const token = req.query.token;
+    const payload = req.body
+    console.log(token,"This is token")
     const url = req.url;
     console.log(url);
     // const payload = req.body
     // console.log(payload.password)
     console.log("we are in reset password", token);
-    const tokenData = await adminModel.findOne({ token: token });
+    const tokenData = await employeeModel.findOne({ token: token });
     console.log(tokenData);
     if (!tokenData) {
       console.log("This link has been expired");
@@ -405,11 +420,11 @@ const resetPassword = async (req, res) => {
       return;
     } else {
       const password = req.body.password;
-      const encryptedPassword = CryptoJS.AES.encrypt(
+      const encryptedPassword = jwt.sign(
         password,
         process.env.SECRET_KEY
       ).toString();
-      const updatedUser = await adminModel.findByIdAndUpdate(
+      const updatedUser = await employeeModel.findByIdAndUpdate(
         tokenData.id,
         { $set: { password: encryptedPassword, token: " " } },
         //  {new:true},
@@ -427,6 +442,11 @@ const resetPassword = async (req, res) => {
       .json({ message: "something went wrong while resetting the password" });
   }
 };
+const forget = async(req,res)=>{
+  const token = req.query.token
+  console.log(token)
+  console.log("hello")
+}
 
 //ejs
 
@@ -501,6 +521,7 @@ module.exports = {
   adminLoginAuth,
   forgotPassword,
   resetPassword,
+  forget,
   forgotPasswordPage,
   resetPasswordPage,
   userProfilePage,

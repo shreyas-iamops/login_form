@@ -20,6 +20,7 @@ const {
     resetPassword,
     forgotPasswordPage,
     resetPasswordPage,
+    forget,
     userProfilePage,
     login,
     
@@ -53,6 +54,8 @@ const {
   appRouter.get("/resetPassword", resetPasswordPage);
   appRouter.post("/forgotPassword", forgotPassword);
   appRouter.post("/resetPassword", resetPassword);
+  // appRouter.get("http://localhost:3001/forgotpassword?token=", forget);
+
   
   //render ejs page
   appRouter.get("/renderPage", index);

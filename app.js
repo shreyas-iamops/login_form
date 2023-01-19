@@ -34,6 +34,6 @@ app.set('view engine', 'ejs')
 
 
 
-app.listen(process.env.port, () => {
-  console.log("server is running on ,", process.env.port);
+app.listen(3000, () => {
+  console.log("server is running on 3000 ");
 });

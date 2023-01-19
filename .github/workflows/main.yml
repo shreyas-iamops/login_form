@@ -27,7 +27,7 @@ name: ECS-deploy
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}                                   # set this to your preferred AWS region, e.g. us-west-1

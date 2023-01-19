@@ -1,0 +1,118 @@
+{
+    "ipcMode": null,
+    "executionRoleArn": "arn:aws:iam::746882603597:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "dnsSearchDomains": null,
+            "environmentFiles": null,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "secretOptions": null,
+                "options": {
+                    "awslogs-group": "/ecs/Growth-backend-login",
+                    "awslogs-region": "ap-south-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "entryPoint": [],
+            "portMappings": [
+                {
+                    "hostPort": 3000,
+                    "protocol": "tcp",
+                    "containerPort": 3000
+                }
+            ],
+            "command": [],
+            "linuxParameters": null,
+            "cpu": 0,
+            "environment": [],
+            "resourceRequirements": null,
+            "ulimits": null,
+            "dnsServers": null,
+            "mountPoints": [],
+            "workingDirectory": null,
+            "secrets": [
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-db-name",
+                    "name": "DB_NAME"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-db-password",
+                    "name": "DB_PASS"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-db-url",
+                    "name": "DB_URL"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-db-user",
+                    "name": "DB_USER"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-node-env",
+                    "name": "NODE_ENV"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-port",
+                    "name": "PORT"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-receiver-mail",
+                    "name": "RECEIVER_MAIL"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-secret-key",
+                    "name": "SECRET_KEY"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-sender-mail",
+                    "name": "SENDER_MAIL"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:ap-south-1:746882603597:parameter/backend-login-sender-password",
+                    "name": "SENDER_PASSWORD"
+                }
+            ],
+            "dockerSecurityOptions": null,
+            "memory": null,
+            "memoryReservation": null,
+            "volumesFrom": [],
+            "stopTimeout": null,
+            "image": "746882603597.dkr.ecr.ap-south-1.amazonaws.com/growth-backend-login:latest",
+            "startTimeout": null,
+            "firelensConfiguration": null,
+            "dependsOn": null,
+            "disableNetworking": null,
+            "interactive": null,
+            "healthCheck": null,
+            "essential": true,
+            "links": null,
+            "hostname": null,
+            "extraHosts": null,
+            "pseudoTerminal": null,
+            "user": null,
+            "readonlyRootFilesystem": null,
+            "dockerLabels": null,
+            "systemControls": null,
+            "privileged": null,
+            "name": "backend-login"
+        }
+    ],
+    "memory": "512",
+    "taskRoleArn": "arn:aws:iam::746882603597:role/ecsTaskExecutionRole",
+    "family": "Growth-backend-login",
+    "pidMode": null,
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "runtimePlatform": {
+        "operatingSystemFamily": "LINUX",
+        "cpuArchitecture": null
+    },
+    "cpu": "256",
+    "inferenceAccelerators": null,
+    "proxyConfiguration": null,
+    "volumes": [],
+    "tags": []
+}

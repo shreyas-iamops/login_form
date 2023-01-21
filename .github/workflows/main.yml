@@ -18,7 +18,7 @@ env:
 permissions:
   id-token: write
   contents: read
-                                                                          # containerDefinitions section of your task definition                                                      
+                                                    
 jobs:
   deploy:
     name: growth-backend-login

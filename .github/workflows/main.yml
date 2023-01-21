@@ -13,7 +13,11 @@ env:
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
   ECS_TASK_DEFINITION: ./task-definition.json                             # set this to the path to your Amazon ECS task definition
                                                                           # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME_NAME }}                      # set this to the name of the container in the
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME_NAME }} 
+  
+permissions:
+  id-token: write
+  contents: read
                                                                           # containerDefinitions section of your task definition                                                      
 jobs:
   deploy:
@@ -28,8 +32,8 @@ jobs:
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        role-to-assume: ${{ env.AWS_ROLE_ARN }}
+        role-session-name: growth-backend-login
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR

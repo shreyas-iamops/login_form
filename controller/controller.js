@@ -40,7 +40,7 @@ const SchemaEmployee = Joi.object().keys({
   password: Joi.string().min(8).required(),
   phoneNo: Joi.number().min(10).required(),
   designation: Joi.string().min(3).required(),
-  department: Joi.string().min(3).required(),
+  // department: Joi.string().min(3).required(),
   token: Joi.string().optional(),
 });
 

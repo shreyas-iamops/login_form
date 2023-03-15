@@ -24,9 +24,9 @@ let employeeSchema = new Schema(
     designation: {
       type: String,
     },
-    department: {
-      type: String,
-    },
+    // department: {
+    //   type: String,
+    // },
     token: {
       type: String,
     },

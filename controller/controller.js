@@ -33,8 +33,8 @@ const page = async (req, res) => {
 
 //joi validation for employee registration
 const SchemaEmployee = Joi.object().keys({
-  firstName: Joi.string().min(3).required(),
-  lastName: Joi.string().min(3).required(),
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
 
   email: Joi.string().email().required(),
   password: Joi.string().min(8).required(),
@@ -78,12 +78,14 @@ const employeeRegistration = async (req, res) => {
       console.log(update);
       console.log(savedUser, "Employee Register successfully");
       res.status(200).json({
+       
         firstName: update.firstName,
         lastName: update.lastName,
         email: update.email,
         designation: update.designation,
         department: update.department,
         token: update.token,
+        message: "Employee Registered successfully",
       });
       // res.json({email:user.email,id:user.id,token:user.token})
       // document. location. reload()
